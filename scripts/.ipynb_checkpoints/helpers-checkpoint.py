@@ -35,18 +35,10 @@ def analyse(X):
     df = pd.DataFrame(feature_details)
     df.index = ['Mean', 'Variance', 'Std', 'min', 'max', 'n-NaNs', 'median']
     df.index.name = 'Statistics'
-    return df
+    
+    return df, feature_details
 
-def standardize(X):
-    feature_details = np.zeros([7, X.shape[1]])
-    for i in range(X.shape[1]):
-        feature_details[0, i] = np.nanmean(X[:,i])
-        feature_details[1, i] = np.nanvar(X[:,i])
-        feature_details[2, i] = np.nanstd(X[:,i])
-        feature_details[3, i] = np.nanmin(X[:,i])
-        feature_details[4, i] = np.nanmax(X[:,i])
-        feature_details[5, i] = np.isnan(X[:,i]).sum()
-        feature_details[6, i] = np.nanmedian(X[:,i])
+def standardize(X, feature_details):
 
     for k in range (X.shape[1]):
         X[:,k]-=feature_details[0,k]
