@@ -35,7 +35,7 @@ def read_and_merge_segmented_data(fine_segmentation=True, exclude_expert=True, e
     labels_segmentation = pd.read_csv(PATH_labels, header=0, index_col=0)
     features_raw = pd.read_csv(PATH_features, header=0, index_col=0)
     
-    ## Translate floats of labels to int
+    ## Translate floats of categorical to int
     labels_segmentation["Label"] = labels_segmentation["Label"].astype(int)
     
     ## Drop "File_Name" from features_raw because labels already has it. Will be merged
@@ -109,3 +109,19 @@ def train_test_split_on_index(features, label, level=0, test_size=0.2, random_st
     y_train = label.loc[y_train_ind]
     y_test = label.loc[y_test_ind]
     return X_train, X_test, y_train, y_test
+
+'''
+Function Goal: translate categorical features from float to int
+'''
+def categorical_float_to_int(df):
+    categorical_features = df.drop('Label',axis=1).columns[:19]
+    df[categorical_features] = df[categorical_features].astype(int)
+    return df
+
+'''
+Function Goal: Take columns starting with EEPD and translate them to dummy variables
+'''
+def categorical_to_dummy(df):
+    categorical_features = df.drop('Label',axis=1).columns[:19]
+    df = pd.get_dummies(df, columns=categorical_features)
+    return df
