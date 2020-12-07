@@ -1,10 +1,11 @@
 REMAINING THINGS TO DO : 
 
-For the features
--drop the name of the record (maybe in helpers/load_vsc_data) OK
--drop the index (maybe in helpers/load_vsc_data)
--with/without the end param. 
+PREPROCESSING:
+Multivariate feature imputation #dealing with missing values better than removing by mean/median
+feature selection
 
+SPLITTING:
 split data
-polynomial expansion
-ML implementations methods
+
+HYPERPARAMETER TUNING:
+grid search
