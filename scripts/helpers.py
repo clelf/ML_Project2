@@ -3,6 +3,9 @@
 import csv
 import numpy as np
 import pandas as pd
+## Custom libraries
+import index_helpers as ih
+
 
 def load_csv_data(data_path_features, data_path_labels, K):
     """Loads data.
