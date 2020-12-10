@@ -14,22 +14,27 @@ X_train, X_test, y_train, y_test = train_test_split_on_index(features = df.drop(
 '''
 
 '''
-Function Goal: Reads segmented labels and features and merge into dataframe - optionally include data
-Function Input: fine_segmentation: True = import fine segmentation data - False = import coarse segmentation data
+Function Goal: Reads (segmented )labels and features and merge into dataframe - optionally include data
+Function Input: segmentation: False if "no segmentation", True if "fine" or "coarse". By default, True
+                fine_segmentation: True = import fine segmentation data - False = import coarse segmentation data
                 exlude_expert: True = excludes column for which expert labeled the data
                 exlude_meta_data: True = exludes meta data
 Function Output: df - merged DataFrame
                 
 '''
-def read_and_merge_segmented_data(fine_segmentation=True, exclude_expert=True, exclude_meta_data=True):
+def read_and_merge_data(segmentation = True, fine_segmentation=True, exclude_expert=True, exclude_meta_data=True):
     
-    ## Set path
-    if(fine_segmentation):
-        PATH_labels = Path('../data/labels_fine_segmentation.csv')
-        PATH_features = Path('../data/features_fine_segmentation.csv')
+    if segmentation:
+      ## Set path
+      if(fine_segmentation):
+          PATH_labels = Path('../data/labels_fine_segmentation.csv')
+          PATH_features = Path('../data/features_fine_segmentation.csv')
+      else:
+          PATH_labels = Path('../data/labels_coarse_segmentation.csv')
+          PATH_features = Path('../data/features_coarse_segmentation.csv')
     else:
-        PATH_labels = Path('../data/labels_coarse_segmentation.csv')
-        PATH_features = Path('../data/features_coarse_segmentation.csv')
+      PATH_features = Path("../data/features_no_segmentation.csv")
+      PATH_labels = Path("../data/labels_no_segmentation.csv")
     
     ## Read data
     labels_segmentation = pd.read_csv(PATH_labels, header=0, index_col=0)
@@ -125,3 +130,17 @@ def categorical_to_dummy(df):
     categorical_features = df.drop('Label',axis=1).columns[:19]
     df = pd.get_dummies(df, columns=categorical_features)
     return df
+
+
+def separate_expert(df):
+    '''
+    Function Goal: separate a data set into three data sets according to the expert
+    Input: a data set (DataFrame) that should contain a column labeled as 'Expert' and a column containing the labels
+    Output: 3 datasets containing their respective labels, and without the 'Expert' column
+    '''
+    df1 = df[df['Expert']==1.0]
+    df2 = df[df['Expert']==2.0]
+    df3 = df[df['Expert']==3.0]
+    
+    return df1, df2, df3
+
