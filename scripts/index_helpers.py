@@ -124,11 +124,15 @@ def categorical_float_to_int(df):
     return df
 
 '''
-Function Goal: Take columns starting with EEPD and translate them to dummy variables
+Function Goal: Take columns starting with EEPD and translate them to dummy variables,
+                same for column Expert if include_expert_as_dummies = True
 '''
-def categorical_to_dummy(df):
-    categorical_features = df.drop('Label',axis=1).columns[:19]
+def categorical_to_dummy(df, include_expert_as_dummies=False):
+    categorical_features = df[[col for col in df if col.startswith('EEPD')]].columns
     df = pd.get_dummies(df, columns=categorical_features)
+    if include_expert_as_dummies:
+      if 'Expert' in df:
+        df = pd.get_dummies(df, columns=df[["Expert"]].columns)
     return df
 
 
@@ -136,11 +140,18 @@ def separate_expert(df):
     '''
     Function Goal: separate a data set into three data sets according to the expert
     Input: a data set (DataFrame) that should contain a column labeled as 'Expert' and a column containing the labels
+          OR 3 columns starting with Expert_ if it has been transformed into categorical
     Output: 3 datasets containing their respective labels, and without the 'Expert' column
     '''
-    df1 = df[df['Expert']==1.0]
-    df2 = df[df['Expert']==2.0]
-    df3 = df[df['Expert']==3.0]
     
-    return df1, df2, df3
+    if 'Expert' in df:
+      df1 = df[df['Expert']==1.0].drop('Expert', axis = 1)
+      df2 = df[df['Expert']==2.0].drop('Expert', axis = 1)
+      df3 = df[df['Expert']==3.0].drop('Expert', axis = 1)
+      return df1, df2, df3
+    elif 'Expert_1.0' in df:
+      df1 = df[df['Expert_1.0']==1].drop(['Expert_1.0','Expert_2.0','Expert_3.0'], axis=1)
+      df2 = df[df['Expert_2.0']==1].drop(['Expert_1.0','Expert_2.0','Expert_3.0'], axis=1)
+      df3 = df[df['Expert_3.0']==1].drop(['Expert_1.0','Expert_2.0','Expert_3.0'], axis=1)
+      return df1, df2, df3
 
