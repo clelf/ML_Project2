@@ -101,25 +101,26 @@ Function Output: X_train, X_test, y_train, y_test - split by index
 
 '''
 def train_test_split_on_index(features, label, level=0, test_size=0.2, random_state = 42):
+    
     ## Split indices into training and testing
     X_train_ind, X_test_ind, y_train_ind, y_test_ind = train_test_split(features.index.levels[level], 
                                                                         label.index.levels[level],
                                                                         test_size=test_size, 
                                                                         random_state=random_state)
-
+    
     ## Slice features by split indices (persons)
     X_train = features.loc[X_train_ind]
     X_test = features.loc[X_test_ind]
     y_train = label.loc[y_train_ind]
     y_test = label.loc[y_test_ind]
-        
     return X_train, X_test, y_train, y_test
 
 '''
 Function Goal: translate categorical features from float to int
+Warning: must be called before categorial_to_dummies
 '''
 def categorical_float_to_int(df):
-    categorical_features = df.drop('Label',axis=1).columns[:19]
+    categorical_features = df[[col for col in df if col.startswith('EEPD')]].columns
     df[categorical_features] = df[categorical_features].astype(int)
     return df
 
@@ -127,12 +128,14 @@ def categorical_float_to_int(df):
 Function Goal: Take columns starting with EEPD and translate them to dummy variables,
                 same for column Expert if include_expert_as_dummies = True
 '''
-def categorical_to_dummy(df, include_expert_as_dummies=False):
+def categorical_to_dummy(df, include_expert_as_dummies=False, exclude_meta_data=True):
     categorical_features = df[[col for col in df if col.startswith('EEPD')]].columns
     df = pd.get_dummies(df, columns=categorical_features)
     if include_expert_as_dummies:
       if 'Expert' in df:
         df = pd.get_dummies(df, columns=df[["Expert"]].columns)
+    if not exclude_meta_data:
+      df = pd.get_dummies(df, columns= df[['Gender', 'Resp_Condition', 'Symptoms']].columns)
     return df
 
 
