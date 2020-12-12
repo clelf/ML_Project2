@@ -1,24 +1,32 @@
 # -*- coding: utf-8 -*-
 from sklearn.preprocessing import PowerTransformer
-from sklearn.model_selection import train_test_split
-from sklearn import svm, datasets
-from sklearn.model_selection import GridSearchCV
-from sklearn.svm import SVC
-from sklearn.linear_model import LogisticRegression
+import pandas as pd
+
 '''
 Function Goal: Center and scale features without modifying label
 Function Input: df: contains label and features
 Function Output: df_normalized: df of normalized features
 '''
 def scenter_scale_features(df):
+    #don't normalize Label
+    Labels = df['Label']
+    Expert_ = df[[col for col in df if col.startswith('Expert')]]
+    Metadata = df[['Gender', 'Resp_Condition', 'Symptoms']]
+    df=df.drop(['Gender', 'Resp_Condition', 'Symptoms', 'Label'], axis=1)
+    df=df.drop((col for col in df if col.startswith('Expert')), axis=1)
+    df
     
     ## list of features
     features = df.columns[1:]
-    
+
     ## Normalize features
     df[features] = (df[features]-df[features].mean())/df[features].std()
     
-    return df
+    #merge features and labels
+    final = pd.merge(Labels, df, left_index=True, right_index=True)
+    final = pd.merge(final, Expert_, left_index=True, right_index=True)
+    final = pd.merge(final, Metadata, left_index=True, right_index=True)
+    return final
 
 
 '''
@@ -49,24 +57,10 @@ def power_transform_skewed_features(df, skew_threshold=2, x_shift=1):
     
     return df, pt
 
-#reduces dimensionality after Feature Correlation
-def reduce_dimension(df, treshold):
-    #Compute the correlation matrix
-    corr = df.drop('Label', axis=1).corr()
-    i = corr[(corr > treshold) | (corr < -treshold) ].fillna(0)
-    i = i[i<1.0]
-    i = i[i>-1.0]
-    new = i**2
-    new[new.isnull()==True]=0
-    sumnew=new.sum(axis=0)
-    ind_=sumnew[sumnew>1]
-    ind_=ind_.index[1:]
-    final=df.drop(ind_,axis=1)
-    return final
 
-def test_LogReg(df):
-    X_train, X_test, y_train, y_test = train_test_split(df.drop('Label', axis=1), df['Label'], test_size=0.2)
-    LR = LogisticRegression(max_iter=5000).fit(X_train, y_train.to_numpy().squeeze())
-    predLR = LR.predict(X_test)
-    accuracyLR = LR.score(X_test, y_test.to_numpy().squeeze())
-    return accuracyLR
+def transformation_call(df, normalization=False, power=False):
+    if normalization:
+        df=scenter_scale_features(df)
+    if power:
+        df, pt=power_transform_skewed_features(df, x_shift=10)
+    return df
