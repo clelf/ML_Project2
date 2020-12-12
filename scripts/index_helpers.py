@@ -101,18 +101,18 @@ Function Output: X_train, X_test, y_train, y_test - split by index
 
 '''
 def train_test_split_on_index(features, label, level=0, test_size=0.2, random_state = 42):
-    
     ## Split indices into training and testing
     X_train_ind, X_test_ind, y_train_ind, y_test_ind = train_test_split(features.index.levels[level], 
                                                                         label.index.levels[level],
                                                                         test_size=test_size, 
                                                                         random_state=random_state)
-    
+
     ## Slice features by split indices (persons)
     X_train = features.loc[X_train_ind]
     X_test = features.loc[X_test_ind]
     y_train = label.loc[y_train_ind]
     y_test = label.loc[y_test_ind]
+        
     return X_train, X_test, y_train, y_test
 
 '''

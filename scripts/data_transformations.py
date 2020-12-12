@@ -1,6 +1,10 @@
 # -*- coding: utf-8 -*-
 from sklearn.preprocessing import PowerTransformer
-
+from sklearn.model_selection import train_test_split
+from sklearn import svm, datasets
+from sklearn.model_selection import GridSearchCV
+from sklearn.svm import SVC
+from sklearn.linear_model import LogisticRegression
 '''
 Function Goal: Center and scale features without modifying label
 Function Input: df: contains label and features
@@ -44,3 +48,25 @@ def power_transform_skewed_features(df, skew_threshold=2, x_shift=1):
     df[skewed_features.index] = pt.transform(df_transform[skewed_features.index])
     
     return df, pt
+
+#reduces dimensionality after Feature Correlation
+def reduce_dimension(df, treshold):
+    #Compute the correlation matrix
+    corr = df.drop('Label', axis=1).corr()
+    i = corr[(corr > treshold) | (corr < -treshold) ].fillna(0)
+    i = i[i<1.0]
+    i = i[i>-1.0]
+    new = i**2
+    new[new.isnull()==True]=0
+    sumnew=new.sum(axis=0)
+    ind_=sumnew[sumnew>1]
+    ind_=ind_.index[1:]
+    final=df.drop(ind_,axis=1)
+    return final
+
+def test_LogReg(df):
+    X_train, X_test, y_train, y_test = train_test_split(df.drop('Label', axis=1), df['Label'], test_size=0.2)
+    LR = LogisticRegression(max_iter=5000).fit(X_train, y_train.to_numpy().squeeze())
+    predLR = LR.predict(X_test)
+    accuracyLR = LR.score(X_test, y_test.to_numpy().squeeze())
+    return accuracyLR
